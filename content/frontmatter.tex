@@ -40,7 +40,10 @@ non-intrusive load monitoring, alternating current optimal power flow.}
 %> Abstract. Mandatory and very important. Keep it under 350 words.
 %> ------------------------------------------------------------------------------
 \begin{abstract}
-In this work, two engineering problems that could potentially lead to reductions in energy consumption and waste are identified and solutions are proposed that make use of an approximate statistical inference technique called Variational Inference. These problems encompass a sensing problem on the demand-side, namely Non-Intrusive Load Monitoring, as well as a control problem on the generation-side known as Alternating Current Optimal Power Flow. We show that the application of Variational Inference can dramatically reduce the computational time required to obtain approximate solutions to otherwise NP-hard problems by making use of an auxiliary distribution parameterized by Neural Networks that avoids any independence assumption whilst still be computationally efficient.
+In this work, two engineering problems that could potentially lead to reductions in energy consumption and waste are identified and solutions are proposed that make use of an approximate statistical inference technique called Variational Inference (VI). VI turns statistical inference into an optimization problem by introducing an auxiliary distribution and minimizing a divergence measure between the auxiliary and true distribution. Because of recent successes of Neural Networks for non-linear optimization, modern VI approaches parameterize the auxiliary distribution by Neural Networks which entails that, after training, inference can be extremely fast as it only requires a forward pass through a Neural Network. The engineering problems at hand encompass a sensing problem on the demand-side, namely Non-Intrusive Load Monitoring, as well as a control problem on the generation-side known as Alternating Current Optimal Power Flow. For these problems, VI based algorithm are introduced that allow to quickly obtain approximate solutions to otherwise NP-hard problems.
+
+
+%We introduce algorithms for the problems at hand that build on top of Variational Inference that dramatically reduce the computational time required to obtain approximate solutions to otherwise NP-hard problems. %by making use of an auxiliary distribution parameterized by Neural Networks that avoids any independence assumption whilst still be computationally efficient.
 \end{abstract}
 
 %> ------------------------------------------------------------------------------
@@ -56,5 +59,6 @@ To the one boy, with only one eye.
 %> your committee and your funding sources.
 %> ------------------------------------------------------------------------------
 \begin{acknowledgments}
-I acknowledge my committee: Soummya Karr 
+This is a placeholder for acknowledgements.
+
 \end{acknowledgments}
