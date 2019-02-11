@@ -2,15 +2,10 @@
 
 % As a general rule, do not put math, special symbols or citations
 % in the abstract or keywords.
-\subsection{Abstract}
-For most control problems, there are two rivaling approaches that have their unique advantages and disadvantages: control is either achieved by learning algorithms with reinforcement learning as its most prominent member or by optimization. However, for the Alternating Current Optimal Power Flow problem, optimization approaches dominate, mostly because learning approaches struggle with enforcing the numerous constraints inherent to ACOPF. In this paper, we propose a learning based approach to the ACOPF problem that allows for enforcing non-convex integer constraints as well as convex security constraints by differentiating through the operations of a load flow solver. We perform experiments on a 200 bus system and show that, after training, the learned agent produces (sub-)optimal power flow solutions reliably and fast. Specifically, we report a 12x increase in speed and a 40\% increase in robustness compared to a traditional solver.
+\section{Abstract}
+For most control problems, there are two rivaling approaches that have their unique advantages and disadvantages: control is either achieved by learning algorithms with reinforcement learning as its most prominent member or by optimization. However, for the Alternating Current Optimal Power Flow problem, optimization approaches dominate, mostly because learning approaches struggle with enforcing the numerous constraints inherent to ACOPF. In this paper, we propose a learning based approach to the ACOPF problem that allows for enforcing non-convex integer constraints as well as convex security constraints by differentiating through the operations of a load flow solver. We perform experiments on a 200 bus system and show that, after training, the learned agent produces (sub-)optimal power flow solutions reliably and fast. Specifically, we report a 12x increase in speed and a 40\% increase in robustness compared to a traditional solver. We believe this work serves as a first step and proof of concept for learning based ACOPF solvers.
 
-
-
-
-
-
-\subsection{Introduction}
+\section{Introduction}
 % The very first letter is a 2 line initial drop letter followed
 % by the rest of the first word in caps.
 % 
@@ -29,7 +24,7 @@ For most control problems, there are two rivaling approaches that have their uni
 There seems to be a dichotomy in approaches for control. On one hand there are learning based approaches whose goal it is to train an agent $g$ to produce actions ($a \in A$) in a given state $s \in S$ that minimize the cost (or maximize the reward) $c \in C$ specified by some environment. These approaches are typically fast and can be robust, however, they typically cannot guarantee optimality and enforcing constraints is oftentimes difficult. On the other hand, there are optimization based approaches such as interior point solvers that under some conditions can be proven to be optimal and usually handle constraints gracefully. However, these approaches can be prohibitively slow and given e.g. non-linear equality constraints not robust because convergence to a local minimum or a spurious solution cannot be ruled out.\\
 According to the FERC, computational time and robustness are still bottlenecks for ACOPF algorithms especially when integer constraints are to be enforced~\cite{ferc2012history}. Because of this, we propose a learning based approach in this paper. Specifically, we introduce a learning framework with similarities to actor-critic reinforcement learning~\cite{barto2004j}. Actor-critic learning usually comprises two sub-modules: an actor $g$ and a critic $f$. The critic is traditionally tasks with learning the costs (or rewards) the agent would incur by applying a specific action in a given state, i.e. it learns a function of the type: $f: A \times S \rightarrow C$. The actor on the other hand is tasked with producing the action that minimizes the cost for any given state, i.e. the actor constitutes a function of type: $g: A \rightarrow S$, and usually receives the learning signal from the critic. After training, the critic is usually discarded because its sole purpose is to provide a learning signal to the actor. As we will show later, our approach does not require a critic-function because we can differentiate directly through the environment which ultimately allows our framework to obtain a learning signal without having to train a critic similar to the approach described in \cite{NIPS2018_7948}. This 'trick' ultimately allows us to enforce convex security constraints such as voltage magnitude constraints. Note that in the case for ACOPF, the actions constitute generator configurations and the state constitutes a demand assignment to the nodes in the networks whereas the environment constitutes the solution the power flow equations that is being fed into the cost function. As we will show later, this environment is differentiable by computing the gradient directly through the operators of a power flow solver, therefore allowing us to obtain a learning signal for the actor function $g$ without the need to train a critic.
 
-\subsection{Proposed Learning Framework}
+\section{Proposed Learning Framework}
 As described earlier, alternating current optimal power flow is traditionally posed as a constrained optimization problem, i.e. a cost function is minimized under network constraints \cite{carpentier1962contribution}. Let $c(v)$ be the cost associated with the assignment of nodal voltages $v \in \mathbb{C}^N$ and $N$ being the number of buses of the system. Here we define the cost in terms of $v$ for simplicity. However, numerous constraints need to be enforced, some of which are non-linear and non-convex, i.e. the load flow problem is traditionally posed as:
 \begin{align}
 \text{minimize w.r.t. $v$:\ }& c(v)\\
@@ -54,13 +49,13 @@ This problem formulation has a number of advantages:
 \item Because training $g$ entails learning a function that transforms a demand into an optimal generation assignment and therefore exploits covariances between load flow problems, $g$ produces robust optimal load flow solutions and generalizes to unseen problems.
 \end{enumerate}
 
-However, optimizing $\Theta$ w.r.t. (\ref{LOPF_obj}) poses additional challenges: If gradient descent is used for optimization, gradients need to be defined. The cost function $c$ can usually assumed to be differentiable as well as $g$, i.e. $g$ can be chosen from a family of differentiable functions. However, the fact that computing the gradient through a power flow solver, i.e. $\mathfrak{v}$, is possible, might not be obvious. In subsection \ref{sec:helm}, we will show that computing the gradient through a specific type of power flow solver, namly the Holomorphic Embedded Load Flow Method is possible which allows us to obtain $\frac{\partial \mathcal{L}}{\partial \Theta}$.\\
-Furthermore, the constraints i.e. (\ref{const1}) and (\ref{const2}) need to be enforced. In subsection \ref{sec:constraints}, we will show that introducing an auxiliary function $\mathfrak{u}$ can be used to enforce the Karush-Kuhn-Tucker conditions ultimately allowing us to enforce arbitrary constraints.\\
-In subsection \ref{sec:bin_contraints}, we will show that the proposed formulation can be used to gracefully handle non-convex, in this case binary constraints by optimizing a variational lower bound whilst introducing little computational overhead during inference.\\
-We then conduct experiments on a 200 bus system. The experimental setup and results are described in subsection 5. In subsection 6, our findings are concluded and pathways for future work are laid out.
+However, optimizing $\Theta$ w.r.t. (\ref{LOPF_obj}) poses additional challenges: If gradient descent is used for optimization, gradients need to be defined. The cost function $c$ can usually assumed to be differentiable as well as $g$, i.e. $g$ can be chosen from a family of differentiable functions. However, the fact that computing the gradient through a power flow solver, i.e. $\mathfrak{v}$, is possible, might not be obvious. In section \ref{sec:helm}, we will show that computing the gradient through a specific type of power flow solver, namly the Holomorphic Embedded Load Flow Method is possible which allows us to obtain $\frac{\partial \mathcal{L}}{\partial \Theta}$.\\
+Furthermore, the constraints i.e. (\ref{const1}) and (\ref{const2}) need to be enforced. In section \ref{sec:constraints}, we will show that introducing an auxiliary function $\mathfrak{u}$ can be used to enforce the Karush-Kuhn-Tucker conditions ultimately allowing us to enforce arbitrary constraints.\\
+In section \ref{sec:bin_contraints}, we will show that the proposed formulation can be used to gracefully handle non-convex, in this case binary constraints by optimizing a variational lower bound whilst introducing little computational overhead during inference.\\
+We then conduct experiments on a 200 bus system. The experimental setup and results are described in section 5. In section 6, our findings are concluded and pathways for future work are laid out.
 
 
-\subsection{Holomorphic Embedded Load Flow Method}
+\section{Holomorphic Embedded Load Flow Method}
 \label{sec:helm}
 The Holomorphic Embedded Load Flow method (HELM) was first proposed by Trias \cite{trias2012holomorphic,trias2015fundamentals} and was later extended in \cite{subramanian2013pv,wallace2016alternative}. HELM addresses the problem of Newton-Raphson based power flow solvers that may not converge or converge to an unstable or low voltage solution. Specifically, it overcomes the ambiguity problem that traditional solvers face, namely that the power flow equations have multiple roots and that initial conditions determine which root is being found. HELM deterministically always finds the same root. Mathematically, this is achieved by performing analytical continuation which is unique when the function at hand is holomorphic.  HELM finds the solution that is on the same branch-cut as the solution to a trivial load flow problem. Algorithmically, the general idea is to treat the complex nodal voltages as holomorphic functions of a complex scalar $z$. These functions are then evaluated at a point for which obtaining a solution is trivial (usually $z=0$) and by exploiting holomorphicity, analytical continuation is performed to obtain the solution at a desired point where the original power flow equations are recovered (usually $z = 1$). Let $\mathcal{V}(z)$ be a function of the complex scalar $z$. Equation (\ref{eq:helm_embed}) then describes such a holomorphic embedding, i.e. obtaining a solution at $z = 0$ is trivial because no power is flowing and the original power flow equations (\ref{eq:pf_const}) are recovered at $z = 1$. See \cite{wallace2016alternative} for a proof that $\mathcal{V}(z)$ is indeed holomorphic.
 \begin{equation}
@@ -110,7 +105,7 @@ with: $ M(c_i) = \\
  
  and $I$ being the identity matrix. Because we perform analytical continuation to $z=1$, plugging the obtained coefficients into (\ref{eq:pade_approx}) yields: $V_i \approx \sum_{j=0}^m a_{j,i} / (1+\sum_{j=0}^m b_{j,i})$.
 
-\subsubsection{Differentiating through HELM}
+\subsection{Differentiating through HELM}
 In the following we will view HELM as a function that maps complex nodal power into complex nodal voltages, i.e. $v = \mathfrak{v}(S_d,g_\Theta(S_d))$. We will show that $\mathfrak{v}$ is not holomorphic but $\mathbb{R}$-differentiable in $\Theta$ ultimately allowing us to compute gradients into the parameters of an actor-function $g$. The strategy is to decompose HELM into a succession of functions and show that each function is $\mathbb{R}$-differentiable. Specifically, we decompose HELM into its algorithmic steps, i.e. $\mathfrak{v}(S_d,g_\Theta(S_d)) = f_v \circ f_{ab} \circ f_{c,n} (S_d-g_\Theta(S_d))$ with $f_{c,n}$ computing power series coefficients, $f_{ab}$ performing Pad\'e approximation and $f_v$ computing voltage phasors given Pad\'e approximants. We then show that $f_{ab}$,$f_{c,n}$ as well as $f_{v}$ are $\mathbb{R}$-differentiable. Note that $f_{c,n}$ is a recursive function and that writing its gradient out would be tedious but that gradients can be computed efficiently using the backpropagation algorithm and implementation is trivial in frameworks with automatic differentiation like \emph{Tensorflow}, \emph{Torch} or \emph{theano}.
 
 As stated earlier, HELM first computes the power series coefficients followed by Pad\'e approximation. The power series coefficients $c[n]$ and $d[n]$ are obtained alternately, i.e.: Let $f_{c,n}$ and $f_{d,n}$ be the function that produces $c[n]$ and $d[n]$ respectively. Note that $f_{c,n}$ requires knowledge of the previous $d$-coefficient and $g_\Theta$, whereas $f_d$ is a function of all previous $c$- and $d$-coefficients:
@@ -127,18 +122,18 @@ f_v(\begin{bmatrix}a\\ b\end{bmatrix}) = \sum_{i=0}^m a_i / (1+\sum_{i=0}^m b_i)
 \end{align*}
 therefore, $\mathfrak{v}(x) = f_v(f_{ab}(f_{c,n}(x)))$ is differentiable in its argument $x$ and when applied to $x = S_d-g_\Theta(S_d)$ differentiable in $\Theta$.
 
-\subsection{Enforcing Constraints}
+\section{Enforcing Constraints}
 \label{sec:constraints}
-\subsubsection{A priori constraints}
+\subsection{A priori constraints}
 As stated earlier, we treat the generation assignment $S_g$ as the output of a parameterized agent $g_\Theta$. Because of the reasoning laid out earlier, we require $g$ to be differentiable and because of recent successes of neural networks in non-linear optimization, we choose $g$ to be a neural network with a penultimate sigmoidal layer. We incorporate the generation limits of the generators into the output layer of the neural network and therefore enforce generation limits by construction. Let $\sigma \in (0,1)^{2N_g}$ be the penultimate layer with $N_g$ being the number of generator buses. Thus, every generator is associated with two neurons, i.e.:
 \begin{align*}
 g_\Theta(S_d)_i = (S_g)_i &= (P_i^{max} - P_i^{min})\sigma_i + P_i^{min}\\
  &+ j(Q_i^{max} - Q_i^{min})\sigma_{i+N_g}  + jQ_i^{min}
 \end{align*}
-with $P^{lim}_i$ and $Q_i^{lim}$ being the active and reactive generation limit respectively. Because $\sigma$ is bounded by $(0,1)$ non-slack generation limits cannot be violated. However, other constraints such as e.g. voltage magnitude or thermal line limits cannot seem to be enforced by construction. That is why, in the next subsection we show how to enforce \emph{a posteriori} constraints, i.e. constraints whose violation is only known after evaluating $\mathfrak{v}$.
+with $P^{lim}_i$ and $Q_i^{lim}$ being the active and reactive generation limit respectively. Because $\sigma$ is bounded by $(0,1)$ non-slack generation limits cannot be violated. However, other constraints such as e.g. voltage magnitude or thermal line limits cannot seem to be enforced by construction. That is why, in the next section we show how to enforce \emph{a posteriori} constraints, i.e. constraints whose violation is only known after evaluating $\mathfrak{v}$.
 
 
-\subsubsection{A posteriori constraints}
+\subsection{A posteriori constraints}
 We adapt ideas from mathematical optimization to enforce arbitrary constraints on $v$. In mathematical optimization, the Karush-Kuhn-Tucker conditions (KKT-conditions) are necessary conditions for a solution to be optimal. Given the optimization problem (5) expressed in terms of $v$, the KKT conditions state that a solution $v'$ is locally optimal under some regularity conditions when there exist $\mu_i$ such that:
 \begin{itemize}
 \item $\forall_i \mu_i \geq 0$ (Dual feasibility)
@@ -169,7 +164,7 @@ We will now show that, after convergence, for all $S_d \in D$, $v' = \mathfrak{g
 
 Note that the detour of substituting $k_i(v)$ for $k_i^+(v)$ improves the performance substantially. Without the substitution, because more constraints are complied with initially, the neural network drives the outputs before the soft-plus non-linearity to $-\infty$ in order to make the corresponding $\mu_i$ equal to 0. The output units are then `dead', i.e. always 0, and because the gradient of the output non-linearity is close to 0, will always stay 0.
 
-\subsubsection{Enforcing Physicality}
+\subsection{Enforcing Physicality}
 \label{sec:enforcing_phys}
 So far, we have shown how to enforce `a priori'-constraints, i.e. constraints whose violation is known before inferring nodal voltages, by construction, as well as `a posteriori'-constraints, i.e. constraints whose violation is known after inferring nodal voltages, by introducing a learning objective that, after convergence, will enforce the KKT-conditions. However, we have not yet shown how to keep the actor-function $g$ in the physical regime, i.e. prevent $g$ from producing a generation assignment $S_g$ for some $S_d$ such that there is no $v$ that fulfill the power flow equations (\ref{eq:pf_const}). An extreme example of a non-physical tuple $(S_d, S_g)$, for any demand assignment $S_d$ for which $\sum_i real(S_d)_i > 0$ is $S_g = \vec{0}$. 
 
@@ -182,7 +177,7 @@ The goal now is to enforce that $\epsilon(v) < \xi$ with $\xi$ being some parame
 
 \begin{figure}
 \includegraphics[width=\linewidth]{krtofl/error_phys.pdf}
-\caption{The $log$-mismatch $\epsilon$ as a function of $\alpha$, i.e. $\epsilon(\mathfrak{v}(S_d,\alpha S_g))$. $\alpha$ scales a physical solution, i.e. when $\alpha = 1$ the corresponding $\epsilon$ is small. The number of HELM iterations $n$ is color coded.}
+\caption[LOPF: The $log$-mismatch $\epsilon$ as a function of $\alpha$]{The $log$-mismatch $\epsilon$ as a function of $\alpha$, i.e. $\epsilon(\mathfrak{v}(S_d,\alpha S_g))$. $\alpha$ scales a physical solution, i.e. when $\alpha = 1$ the corresponding $\epsilon$ is small. The number of HELM iterations $n$ is color coded.}
 \label{fig:errors}
 \end{figure}
 
@@ -191,11 +186,11 @@ In order to overcome this problem, we propose to optimize a proxy of the actual 
 
 \begin{figure}
 \includegraphics[width=\linewidth]{krtofl/ceps.pdf}
-\caption{Small $\log \bar{c}[n]$ is a sufficient condition for small $\log(\epsilon)$. Specifically, when $\log \bar{c}[n] > -15$ then $-20 < \log(\epsilon) < -25$. However, the opposite is not true, i.e. small $\log(\epsilon)$ does not bound $\log \bar{c}[n]$.}
+\caption[LOPF: Small power series coeffients imply small error.]{Small $\log \bar{c}[n]$ is a sufficient condition for small $\log(\epsilon)$. Specifically, when $\log \bar{c}[n] > -15$ then $-20 < \log(\epsilon) < -25$. However, the opposite is not true, i.e. small $\log(\epsilon)$ does not bound $\log \bar{c}[n]$.}
 \label{fig:ceps}
 \end{figure}
 
-\subsection{Binary Constraints}
+\section{Binary Constraints}
 \label{sec:bin_contraints}
 Binary constraints naturally occur in optimal power flow when incorporating the possibility of completely shutting down generators. Introducing this constraint make generation limit constraints non-convex, i.e. $0$ becomes a possible generation assignment, even though points between $0$ and $P^{min}$ are not valid. Typically, optimal power flow solvers employ mixed integer programming techniques such as \emph{branch and bound} or \emph{branch and cut}~\cite{lawler1966branch} algorithms to tackle this problem. However, these algorithms can incur substantial computational cost, i.e. every branch requires solving an LP relaxed optimal power flow problem and there are exponentially-many branches in a worst-case scenario.
 
@@ -225,13 +220,13 @@ However, the price for this `trick' is increased variance. It can be shown that 
 In order to obtain an approximation of the mode of the true posterior, because $Q$ allows for drawing samples efficiently, $S$-many samples are drawn from $Q$. Then, in order to approximate the mode of $P$, out of the $S$-many binary configurations sampled from $Q$, the one which results in the smallest loss is chosen. Note that the optimal configuration of generators is dependent on the binary configuration, thus $b$ should additionally be fed into the actor function $g$. Figure \ref{fig:pipe} shows a graphical depiction of the proposed data pipeline.
 \begin{figure}
 \includegraphics[width=0.95\linewidth]{krtofl/pipeline.pdf}
-\caption{A graphical depiction of the \emph{LOPF}-pipeline. Neural networks $b$ and $g$ are fed the complex demand $S_d$ and tasked with producing the optimal binary activation vector and generator configuration respectively. Because the voltages are a function of demand and generation, both are fed into the HELM based power flow solver $v$. The loss $L$ is computed based on the resulting voltages. In order to ensure that control and network inequality constraints are satisfied, a third neural network is tasked with predicting Lagrange multipliers. Because HELM is differentiable, the whole pipeline can be optimized jointly.}
+\caption[LOPF: Graphical depiction of the algorithmic pipeline]{A graphical depiction of the \emph{LOPF}-pipeline. Neural networks $b$ and $g$ are fed the complex demand $S_d$ and tasked with producing the optimal binary activation vector and generator configuration respectively. Because the voltages are a function of demand and generation, both are fed into the HELM based power flow solver $v$. The loss $L$ is computed based on the resulting voltages. In order to ensure that control and network inequality constraints are satisfied, a third neural network is tasked with predicting Lagrange multipliers. Because HELM is differentiable, the whole pipeline can be optimized jointly.}
 \label{fig:pipe}
 \end{figure}
 
-\subsection{The \emph{LOPF}-algorithm}
+\section{The \emph{LOPF}-algorithm}
 \label{sec:LOPFalgo}
-In this subsection we summarize the resulting algorithm, we call \emph{\textbf{L}earning \textbf{O}ptimal \textbf{P}ower \textbf{F}low}, or short \emph{LOPF}. The algorithm iterates over batches of the dataset $D$ making updates to the three constituent neural networks $g$, $b$ and $u$. For notational convenience, we define a function $solve$:
+In this section we summarize the resulting algorithm, we call \emph{\textbf{L}earning \textbf{O}ptimal \textbf{P}ower \textbf{F}low}, or short \emph{LOPF}. The algorithm iterates over batches of the dataset $D$ making updates to the three constituent neural networks $g$, $b$ and $u$. For notational convenience, we define a function $solve$:
 \begin{align*}
 S_g &= b \cdot g_\Theta(S_d, b)\\
 solve(S_d,b)
@@ -284,7 +279,7 @@ Initialize $\Theta, \phi$ and $\psi$ randomly\;
 Figure \ref{lopf:constituent_networks} shows a graphical depiction of the input/output relationships of the individual networks. Note that the actor network $g$ not only produces active and reactive generation assignments for non-slack generators but also the voltage at the slack bus. Furthermore, the magnitude by which constraints are violated, denoted by $k$, are fed into the network $u$ that produces a proxy of the Lagrange multipliers. Additionally feeding $k$ eases and speeds up learning considerably.
 
 
-\subsection{Experiments}
+\section{Experiments}
 \label{sec:LOPFexperiments}
 Since this work introduces a learning based approach to the problem of ACOPF, the performance of the algorithm is evaluated similar to how the performance of reinforcement learning agents is evaluated, i.e. an empirical evaluation strategy is employed. Specifically, given a held out test set of load flow problems that the agent was not presented with during training, the generation cost and whether or not the agent was able to find a feasible solution are recorded. The requirements (without requirements that are met by construction) for feasibility are the following:
 \begin{itemize}
@@ -299,7 +294,7 @@ The neural networks used in this experiments constitute standard fully connected
 \begin{figure*}[!ht]
     \centering
     \includegraphics[width=0.85\linewidth]{krtofl/cost_comapre_uart2.pdf}
-    \caption{Comparison of generation cost on the first 300 load flow problems of the test set.}
+    \caption[LOPF: Comparison of generation cost.]{Comparison of generation cost on the first 300 load flow problems of the test set.}
     \label{lopf:cost}
 \end{figure*}
 
@@ -307,7 +302,7 @@ The neural networks used in this experiments constitute standard fully connected
     \centering
     \includegraphics[width=0.48\linewidth]{krtofl/violation_percentage.pdf}
     \includegraphics[width=0.48\linewidth]{krtofl/epsilon_epoch.pdf}
-    \caption{Left: The percentage of feasible solutions as a function of learning steps. Right: The average log mismatch of the power flow equations (\ref{eq:pf_const}) as a function of time.}
+    \caption[LOPF: Error and feasibility as a function of learning steps.]{Left: The percentage of feasible solutions as a function of learning steps. Right: The average log mismatch of the power flow equations (\ref{eq:pf_const}) as a function of time.}
     \label{lopf:violations}
 \end{figure*}
 
@@ -327,16 +322,16 @@ Time per Instance [s] & 1.2 & 14.4\\
 \label{lopf:res_table}
 \end{table}
 
-\subsection{Results}
+\section{Results}
 \label{sec:LOPFresults}
 As stated earlier, learning based approaches to control problems are usually not guaranteed to be optimal but can offer advantages in terms of computational time and robustness. The performance of \emph{LOPF} reinforces these expectations. Figure \ref{lopf:violations} (left) shows the percentage of load flow solutions produced by the agent that violate any requirement for feasibility as a function of learning steps. One learning step encompasses 32 load flow problems with 50 binary configurations each. One can see that the system quickly learns to produce feasible solutions. Initially the agent produces feasible solutions to no load flow problems. However, after just 30 steps close to all solutions proposed by the learning agent are feasible.\\
-Figure \ref{lopf:violations} (right) shows the $log$-mismatch between the RHS and LHS of the power flow equations (\ref{eq:pf_const}). Note that initially, the agent produces generation assignments for which the HELM solver is unable to produce voltage phasors that fulfill the power flow equations but by minimizing the power series coefficients as described in subsection \ref{sec:enforcing_phys}, the agent is quickly nudged into a regime where the proposed solutions fulfill the power flow equations. However, after approximately 75 learning steps, for a short period of time, the agent produces generation assignments that, again, do not fulfill the power flow equations. This can most likely be explained by the fact that the agent also tries to minimize cost. Thus, by trying to find cheaper generation assignments, the agent left the regime in which solutions can be found by HELM but was then steered back into this regime.\\
+Figure \ref{lopf:violations} (right) shows the $log$-mismatch between the RHS and LHS of the power flow equations (\ref{eq:pf_const}). Note that initially, the agent produces generation assignments for which the HELM solver is unable to produce voltage phasors that fulfill the power flow equations but by minimizing the power series coefficients as described in section \ref{sec:enforcing_phys}, the agent is quickly nudged into a regime where the proposed solutions fulfill the power flow equations. However, after approximately 75 learning steps, for a short period of time, the agent produces generation assignments that, again, do not fulfill the power flow equations. This can most likely be explained by the fact that the agent also tries to minimize cost. Thus, by trying to find cheaper generation assignments, the agent left the regime in which solutions can be found by HELM but was then steered back into this regime.\\
 Table \ref{lopf:res_table} showcases the performance of our proposed algorithm in comparison to the MIPS solver proposed in \cite{zimmerman2011matpower}. In order to deal with non-convex generation limit constraint, the MIPS solver was run with a unit-decommitment heuristic (\emph{runuopf}). When obtaining the results for the MIPS solver, all initializations were unchanged and only demand was varied in the way described earlier. Slightly varying the demand reveals the weakness of traditional solvers: Convergence to a feasible solution cannot be guaranteed. In our experiments, the MIPS solver produced solution which comply with all constraints and fulfill the power flow equations in only about 61\% of all problem instances (failure in 2349 out of 6000 instances). Our proposed solution produces feasible solutions for 99.86\% (failure in 8 out of 6000 cases) of the problem instances.\\
 On top of that, our proposed learning agent is considerably faster than optimization based approaches: Because solutions can be obtained by feeding a demand assignment through the Neural Networks and the forward pass through Neural Nets is usually fast, obtaining the generation assignment proposed by the agent is fast. Note that when we report the time per instance for the MIPS solver, we report the mean-time over all load flow problems. However, when the solver fails, it usually fails quickly. If only the time per successful instance was reported, it would be close to 30s per instance.\\
 However, Table \ref{lopf:res_table} and Figure \ref{lopf:cost} more clearly, reveal the main weakness of our proposed learning based agent. Even though solutions can be obtained robustly and fast, the proposed learning agent does not find solutions that are optimal in terms of generation cost. On average, the solutions that the agent produces are approximately 29\% more expensive than the solutions found by the MIPS solver. Note that the average cost is reported for only those load flow problems for which both approaches yielded feasible solutions.
 
 
-\subsection{Conclusion and future work}
+\section{Conclusion and future work}
 \label{sec:LOPFconclusion}
 The main contribution of this paper is the introduction of a learning based framework for the problem of ACOPF, i.e. we translate a problem that is traditionally tackled by constrained optimization approaches into the language of learning. Specifically, we introduce a learning based approach in which an agent is tasked to produce feasible and minimal cost generation assignments as a function of the demand. A learning signal for this agent is obtained by differentiating through the operators of a load flow solver. Furthermore, we show how convex security constraints and non-convex generation limit constraint can be enforced. The resulting agent seems to produce feasible solutions fast. However, these solutions are not optimal in terms of generation cost.\\
 An obvious future research path is to close the optimality gap. At this moment, because of the complexity of the resulting system, it is hard to understand why the solutions are not optimal. But note that the proposed algorithm cannot be optimal by design, because the slack generator cannot be decommitted and there is a natural interpolation between load flow solutions. However, in the opinion of the authors, performance gains in terms of optimality should be possible.\\
